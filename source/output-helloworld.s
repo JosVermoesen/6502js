@@ -1,29 +1,17 @@
-; 6502 Assembly Language
-; ROM routines
-define		SCINIT		$ff81 ; initialize/clear screen
-define		CHROUT		$ffd2 ; output character to screen
+define SCREEN $F000	; location of screen memory	
 
-; Memory locations
-define		INPUT		$2000 ; input buffer (up to 5 chars)
+	LDY #$00		; index value (character we're currently processing)
 
-	JSR SCINIT
+CHAR:
+	LDA TEXT,Y		; get a character from address (text + Y)
+	BEQ DONE		; if character is NULL, branch to done
+	STA SCREEN,Y	; store character at (SCREEN + Y)
+	INY				; increment Y (go to next character)
+	BNE CHAR		; repeat loop
 
-	LDY #$00
+DONE:
+	BRK				; when we're done, break (stop the program)
 
-PROMPT_CHAR:
-	LDA PROMPT_TEXT,Y
-	BEQ DONE_PROMPT
-	JSR CHROUT
-	INY
-	BNE PROMPT_CHAR
-
-DONE_PROMPT:
-	LDA #$0D
-	JSR CHROUT
-	LDY #$00
-
-	BRK
-
-PROMPT_TEXT:
+TEXT:				; text to display
 	dcb "H","e","l","l","o",32,"W","o","r","l"
 	dcb "d","!",00
